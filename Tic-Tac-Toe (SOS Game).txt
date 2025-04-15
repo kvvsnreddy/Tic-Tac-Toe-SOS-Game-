@@ -1,0 +1,127 @@
+import java.util.Scanner;
+
+public class SOSGame {
+    private static final int GRID_SIZE = 3; // Size of the grid (3x3)
+    private char[][] board;
+    private char currentPlayer;
+
+    public SOSGame() {
+        board = new char[GRID_SIZE][GRID_SIZE];
+        currentPlayer = 'S'; // Player 1 starts with 'S'
+        initializeBoard();
+    }
+
+    // Initialize the board with empty spaces
+    private void initializeBoard() {
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                board[i][j] = '-';
+            }
+        }
+    }
+
+    // Display the current state of the board
+    private void displayBoard() {
+        System.out.println("Current Board:");
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                System.out.print(board[i][j] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    // Check if a move is valid
+    private boolean isValidMove(int row, int col) {
+        return row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE && board[row][col] == '-';
+    }
+
+    // Place the current player's symbol ('S' or 'O') on the board
+    private void placeSymbol(int row, int col) {
+        board[row][col] = currentPlayer;
+    }
+
+    // Switch to the next player
+    private void switchPlayer() {
+        currentPlayer = (currentPlayer == 'S') ? 'O' : 'S';
+    }
+
+    // Check if the current player has formed "SOS"
+    private boolean checkForSOS(int row, int col) {
+        // Check horizontal, vertical, and diagonal directions
+        return checkLine(row, col, 0, 1) || // Horizontal
+               checkLine(row, col, 1, 0) || // Vertical
+               checkLine(row, col, 1, 1) || // Diagonal (top-left to bottom-right)
+               checkLine(row, col, 1, -1);  // Diagonal (top-right to bottom-left)
+    }
+
+    // Helper method to check a line for "SOS"
+    private boolean checkLine(int row, int col, int rowDir, int colDir) {
+        int countS = 0, countO = 0;
+        for (int i = -2; i <= 2; i++) {
+            int newRow = row + i * rowDir;
+            int newCol = col + i * colDir;
+            if (newRow >= 0 && newRow < GRID_SIZE && newCol >= 0 && newCol < GRID_SIZE) {
+                if (board[newRow][newCol] == 'S') countS++;
+                else if (board[newRow][newCol] == 'O') countO++;
+            }
+        }
+        return countS == 2 && countO == 1; // "SOS" requires 2 'S' and 1 'O'
+    }
+
+    // Check if the board is full
+    private boolean isBoardFull() {
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                if (board[i][j] == '-') return false;
+            }
+        }
+        return true;
+    }
+
+    // Main game loop
+    public void playGame() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Welcome to the SOS Game!");
+        System.out.println("Player 1: 'S', Player 2: 'O'\n");
+
+        while (true) {
+            displayBoard();
+            System.out.println("Player " + currentPlayer + "'s turn.");
+            System.out.print("Enter row (0-" + (GRID_SIZE - 1) + "): ");
+            int row = scanner.nextInt();
+            System.out.print("Enter column (0-" + (GRID_SIZE - 1) + "): ");
+            int col = scanner.nextInt();
+
+            if (!isValidMove(row, col)) {
+                System.out.println("Invalid move! Try again.");
+                continue;
+            }
+
+            placeSymbol(row, col);
+
+            if (checkForSOS(row, col)) {
+                displayBoard();
+                System.out.println("Player " + currentPlayer + " wins by forming SOS!");
+                break;
+            }
+
+            if (isBoardFull()) {
+                displayBoard();
+                System.out.println("It's a draw!");
+                break;
+            }
+
+            switchPlayer();
+        }
+
+        scanner.close();
+    }
+
+    // Main method to start the game
+    public static void main(String[] args) {
+        SOSGame game = new SOSGame();
+        game.playGame();
+    }
+}
